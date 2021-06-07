@@ -1,0 +1,10 @@
+.fileContainer .deleteImage {
+  font-size: 15px;
+  background-color: red;
+  width: 25px;
+  height: 25px;
+  line-height: 25px;
+}
+.deleteImage {
+  display: none;
+}
