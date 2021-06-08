@@ -93,14 +93,14 @@ function MainCollection(props) {
     let USDTValue = [];
     try {
       let totalSupply = await chimera.methods.totalSupply().call();
-      let id = await chimera.methods.idCounter().call();
-      console.log(id);
       for (let i = 0; i < totalSupply; i++) {
         let nfts = await chimera.methods.tokenByIndex(i).call();
+
         let owner = await chimera.methods.ownerOf(nfts).call();
         if (owner === accounts[0]) {
           tokenId.push(nfts);
           let res = await axios.get(`${config.host}/file/${nfts}`);
+          console.log(1);
           nftData.push(res.data[0]);
 
           let artistVar = await axios.get(
@@ -115,11 +115,13 @@ function MainCollection(props) {
           let confirmed = await SMAV2.methods
             .isTokenConfirmedByAdmin(nfts)
             .call();
+
           isApprovedByAdmin.push(confirmed);
 
           let price = await SMAV2.methods
             .tokenPrice(config.Chimera, nfts)
             .call();
+          console.log(1);
           const etherValue = Web3.utils.fromWei(price, "ether");
           await axios
             .get(

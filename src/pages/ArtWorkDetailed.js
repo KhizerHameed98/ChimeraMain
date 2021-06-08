@@ -7,11 +7,10 @@ import "react-dropdown/style.css";
 import MainArtWorkDetailed from "../partials/ArtWorkDetailed/MainArtWorkDetailed";
 
 function ArtWorkDetailed(props) {
+  let history = useHistory();
+
   const { id } = useParams();
-  console.log("params", props.match);
-  useEffect(() => {
-    console.log("params", id);
-  }, []);
+
   return (
     <>
       <div className="flex flex-col min-h-screen overflow-hidden">

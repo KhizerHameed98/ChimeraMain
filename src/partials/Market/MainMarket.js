@@ -86,6 +86,8 @@ function MainMarket() {
             .tokenPrice(config.Chimera, nfts)
             .call();
           const etherValue = Web3.utils.fromWei(price, "ether");
+          console.log(112);
+
           await axios
             .get(
               "https://min-api.cryptocompare.com/data/price?fsym=BNB&tsyms=USD"
@@ -95,6 +97,7 @@ function MainMarket() {
               let USD = d.USD * etherValue;
               USDTValue.push(financial(USD));
             });
+          console.log(111);
           nftPrice.push(etherValue);
           if (price === "0") {
             setSalePrice.push(false);
