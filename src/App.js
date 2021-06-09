@@ -115,7 +115,6 @@ function App() {
 
   return (
     <>
-      <BrowserRouter>
         {localStorage.getItem("walletAddress") ? (
           <>
             <Switch>
@@ -191,7 +190,6 @@ function App() {
             </Switch>
           </>
         )}
-      </BrowserRouter>
     </>
   );
 }

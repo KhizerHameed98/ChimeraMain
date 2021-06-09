@@ -34,6 +34,7 @@ function MainCollection(props) {
   const [BiddingPrice, setBiddingPrice] = useState([]);
   const [BiddingOrNot, setBiddingOrNot] = useState([]);
   const [USDValue, setUSDValue] = useState(0);
+  const [USDValueBid, setUSDValueBid] = useState(0);
 
   const [Alldata, setData] = useState([]);
   function _onSelect(option) {
@@ -91,6 +92,7 @@ function MainCollection(props) {
     let bidding = [];
     let biddingBool = [];
     let USDTValue = [];
+    let USDTValueBid = [];
     try {
       let totalSupply = await chimera.methods.totalSupply().call();
       for (let i = 0; i < totalSupply; i++) {
@@ -141,7 +143,19 @@ function MainCollection(props) {
           let bid = await SMAV2.methods
             .currentBidDetailsOfToken(config.Chimera, nfts)
             .call();
-          bidding.push(bid);
+
+          const eth = Web3.utils.fromWei(bid[0], "ether");
+          
+          await axios
+            .get(
+              "https://min-api.cryptocompare.com/data/price?fsym=BNB&tsyms=USD"
+            )
+            .then((res) => {
+              let d = res.data;
+              let USD = d.USD * eth;
+              USDTValueBid.push(financial(USD));
+            });
+          bidding.push(eth);
           if (bid[0] === "0") {
             biddingBool.push(false);
           } else {
@@ -160,6 +174,7 @@ function MainCollection(props) {
         bidding,
         biddingBool,
         USDTValue,
+        USDTValueBid,
       ]).then((res) => {
         console.log(res);
         if (res[0].length === 0) {
@@ -175,6 +190,7 @@ function MainCollection(props) {
         setBiddingPrice(res[7]);
         setBiddingOrNot(res[8]);
         setUSDValue(res[9]);
+        setUSDValueBid(res[10]);
         setLoading(false);
       });
     } catch (error) {
@@ -354,14 +370,13 @@ function MainCollection(props) {
                                                       <div className="col-start-6 col-span-7 mb-2">
                                                         <h1 className="text-base text-green-100">
                                                           <span>
-                                                            {
-                                                              BiddingPrice[
-                                                                key
-                                                              ][0]
-                                                            }
+                                                            {BiddingPrice[key]}
                                                           </span>
                                                           Ξ(
-                                                          <span>$6,720</span>)
+                                                          <span>
+                                                            ${USDValueBid}
+                                                          </span>
+                                                          )
                                                           <p className="text-xxs mt-2 text-green-200">
                                                             Current offer by{" "}
                                                             <a

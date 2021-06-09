@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import Loader from "../../partials/Loader";
 import BuyPopUp from "../../components/BuyPopUp";
+import BidPopUp from "../../components/BidPopUp";
 
 const chimeraContract = require("../../contracts/Chimera.json");
 const SMAV2Contract = require("../../contracts/ChimeraMarketAuctionV2.json");
@@ -30,6 +31,7 @@ function MainArtWorkDetailed({ id }) {
   const [ArtistData, setArtistData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isApprovalForAll, setIsApprovalForAll] = useState("");
+  const [CurrentBid, setCurrentBid] = useState([]);
 
   const [like, setLike] = useState(false);
   async function callData() {
@@ -280,11 +282,19 @@ function MainArtWorkDetailed({ id }) {
                             marketPlaceSettingsFee={maketPlaceFee}
                             OwnerData={OwnerData}
                           />
-                          <div className="text-center mb-20">
+                          {/* <div className="text-center mb-20">
                             <button className="btn text-center make-offer-btn btn-primary mt-4 hover: bg-gray-1000">
                               BID
                             </button>
-                          </div>
+                          </div> */}
+                          <BidPopUp 
+                            id={id}
+                            nftData={NFTData}
+                            nftPrice={NFTPrice}
+                            nftPriceFeeIncluded={TotalBuyPrice}
+                            marketPlaceSettingsFee={maketPlaceFee}
+                            OwnerData={OwnerData}
+                          />
                         </>
                       ) : (
                         <>

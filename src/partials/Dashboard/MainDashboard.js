@@ -51,11 +51,9 @@ export default function MainDashboard() {
   const [TokenId, setTokenId] = useState([]);
   const [TokenPrice, setTokenPrice] = useState([]);
   const [ArtistData, setArtistData] = useState([]);
-  const [IsSalePrice, setIsSalePrice] = useState([]);
-  const [IsApprovedByAdmin, setIsApprovedByAdmin] = useState([]);
+  const [BiddingOwner, setBiddingOwner] = useState([]);
   const [BiddingPrice, setBiddingPrice] = useState([]);
-  const [BiddingOrNot, setBiddingOrNot] = useState([]);
-  const [USDValue, setUSDValue] = useState(0);
+  const [USDValue, setUSDValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [noData, setNoData] = useState(false);
 
@@ -83,11 +81,13 @@ export default function MainDashboard() {
         let nfts = await chimera.methods.tokenByIndex(i).call();
 
         let owner = await chimera.methods.ownerOf(nfts).call();
-        
-        if (owner === accounts[0]) {
+        let bid = await SMAV2.methods
+          .currentBidDetailsOfToken(config.Chimera, nfts)
+          .call();
+
+        if (owner === accounts[0] && bid[0] !== "0") {
           tokenId.push(nfts);
           let res = await axios.get(`${config.host}/file/${nfts}`);
-          console.log(1);
           nftData.push(res.data[0]);
 
           let artistVar = await axios.get(
@@ -99,11 +99,6 @@ export default function MainDashboard() {
             `${config.host}/api/users/${res.data[0].Owner}`
           );
           ownerData.push(ownerVar.data);
-          let confirmed = await SMAV2.methods
-            .isTokenConfirmedByAdmin(nfts)
-            .call();
-
-          isApprovedByAdmin.push(confirmed);
 
           let price = await SMAV2.methods
             .tokenPrice(config.Chimera, nfts)
@@ -119,20 +114,12 @@ export default function MainDashboard() {
               USDTValue.push(financial(USD));
             });
           nftPrice.push(etherValue);
-          if (price === "0") {
-            setSalePrice.push(false);
-          } else {
-            setSalePrice.push(true);
-          }
-          let bid = await SMAV2.methods
-            .currentBidDetailsOfToken(config.Chimera, nfts)
-            .call();
+
           bidding.push(bid);
-          if (bid[0] === "0") {
-            biddingBool.push(false);
-          } else {
-            biddingBool.push(true);
-          }
+          let biddingOwner = await axios.post(`${config.host}/api/auth`, {
+            address: bid[1],
+          });
+          console.log(biddingOwner);
         }
       }
       Promise.all([
@@ -142,7 +129,6 @@ export default function MainDashboard() {
         nftPrice,
         artist,
         setSalePrice,
-        isApprovedByAdmin,
         bidding,
         biddingBool,
         USDTValue,
@@ -151,16 +137,15 @@ export default function MainDashboard() {
         if (res[0].length === 0) {
           setNoData(true);
         }
+
         setNFTData(res[0]);
         setOwnerData(res[1]);
         setTokenId(res[2]);
         setTokenPrice(res[3]);
         setArtistData(res[4]);
-        setIsSalePrice(res[5]);
-        setIsApprovedByAdmin(res[6]);
         setBiddingPrice(res[7]);
-        setBiddingOrNot(res[8]);
-        setUSDValue(res[9]);
+
+        setUSDValue(res[8]);
         setLoading(false);
       });
     } catch (error) {
@@ -246,93 +231,52 @@ export default function MainDashboard() {
                                         </div>
 
                                         <div className=" sm:col-span-12 lg:col-span-12 gap-8 border-b border-black-100">
-                                          {IsApprovedByAdmin[key] ? (
+                                          <>
                                             <>
-                                              {IsSalePrice[key] == true ? (
-                                                <>
-                                                  <div className="grid gap-6 sm:grid-cols-12 lg:grid-cols-12">
-                                                    <div className=" col-start-1 col-span-5 sm:mb-0 lg:mb-2">
-                                                      <h1 className="text-base text-green-100">
-                                                        <span>
-                                                          {TokenPrice[key]}
-                                                        </span>
-                                                        Ξ(
-                                                        <span>
-                                                          ${USDValue[key]}
-                                                        </span>
-                                                        )
-                                                        <p className="text-xxs mt-2 text-green-200">
-                                                          List price
-                                                        </p>
-                                                      </h1>
-                                                    </div>
+                                              <div className="grid gap-6 sm:grid-cols-12 lg:grid-cols-12">
+                                                <div className=" col-start-1 col-span-5 sm:mb-0 lg:mb-2">
+                                                  <h1 className="text-base text-green-100">
+                                                    <span>
+                                                      {TokenPrice[key]}
+                                                    </span>
+                                                    Ξ(
+                                                    <span>
+                                                      ${USDValue[key]}
+                                                    </span>
+                                                    )
+                                                    <p className="text-xxs mt-2 text-green-200">
+                                                      List price
+                                                    </p>
+                                                  </h1>
+                                                </div>
 
-                                                    {BiddingOrNot[key] ? (
-                                                      <>
-                                                        <div className="col-start-6 col-span-7 mb-2">
-                                                          <h1 className="text-base text-green-100">
-                                                            <span>
-                                                              {
-                                                                BiddingPrice[
-                                                                  key
-                                                                ][0]
-                                                              }
-                                                            </span>
-                                                            Ξ(
-                                                            <span>$6,720</span>)
-                                                            <p className="text-xxs mt-2 text-green-200">
-                                                              Current offer by{" "}
-                                                              <a
-                                                                href="#"
-                                                                className="text-green-200"
-                                                                style={{
-                                                                  textDecoration:
-                                                                    "none",
-                                                                }}
-                                                              >
-                                                                @l1ttl3b1gk1d
-                                                              </a>
-                                                            </p>
-                                                          </h1>
-                                                        </div>
-                                                      </>
-                                                    ) : null}
-                                                  </div>
-                                                </>
-                                              ) : (
                                                 <>
-                                                  <div className="grid gap-6 sm:grid-cols-12 lg:grid-cols-12">
-                                                    <div className=" col-start-1 col-span-5 sm:mb-0 lg:mb-2">
-                                                      <h1 className="text-base text-green-100">
-                                                        <span className="text-gray-600">
-                                                          -
-                                                        </span>
-                                                        <p className="text-xxs mt-2 text-gray-600">
-                                                          List price
-                                                        </p>
-                                                      </h1>
-                                                    </div>
-                                                    <div className="col-start-6 col-span-7 text-right mb-2">
-                                                      <DialoguePopUp
-                                                        id={TokenId[key]}
-                                                      />
-                                                    </div>
+                                                  <div className="col-start-6 col-span-7 mb-2">
+                                                    <h1 className="text-base text-green-100">
+                                                      <span>
+                                                        {/* {BiddingPrice[key][0]} */}
+                                                      </span>
+                                                      Ξ(
+                                                      <span>$6,720</span>)
+                                                      <p className="text-xxs mt-2 text-green-200">
+                                                        Current offer by{" "}
+                                                        <a
+                                                          href="#"
+                                                          className="text-green-200"
+                                                          style={{
+                                                            textDecoration:
+                                                              "none",
+                                                          }}
+                                                        >
+                                                          @l1ttl3b1gk1d
+                                                        </a>
+                                                      </p>
+                                                    </h1>
                                                   </div>
                                                 </>
-                                              )}
-                                            </>
-                                          ) : (
-                                            <>
-                                              <div
-                                                className=" col-start-1 col-span-5sm:mb-0 lg:mb-2"
-                                                style={{ paddingBottom: "5px" }}
-                                              >
-                                                <h1 className="text-base mb-4 mt-2 text-green-100">
-                                                  <span>Coming Soon</span>
-                                                </h1>
                                               </div>
                                             </>
-                                          )}
+                                          </>
                                         </div>
 
                                         <div className="grid gap-6 mb-4 sm:grid-cols-12 lg:grid-cols-12">

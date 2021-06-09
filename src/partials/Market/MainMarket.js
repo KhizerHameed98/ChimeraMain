@@ -33,6 +33,7 @@ function MainMarket() {
   const [BiddingPrice, setBiddingPrice] = useState([]);
   const [BiddingOrNot, setBiddingOrNot] = useState([]);
   const [USDValue, setUSDValue] = useState(0);
+  const [USDValueBid, setUSDValueBid] = useState(0);
   const [loading, setLoading] = useState(false);
   const [noData, setNoData] = useState(false);
 
@@ -54,6 +55,8 @@ function MainMarket() {
     let bidding = [];
     let biddingBool = [];
     let USDTValue = [];
+    let USDTValueBid = [];
+
     try {
       let totalSupply = await chimera.methods.totalSupply().call();
 
@@ -86,7 +89,6 @@ function MainMarket() {
             .tokenPrice(config.Chimera, nfts)
             .call();
           const etherValue = Web3.utils.fromWei(price, "ether");
-          console.log(112);
 
           await axios
             .get(
@@ -97,7 +99,6 @@ function MainMarket() {
               let USD = d.USD * etherValue;
               USDTValue.push(financial(USD));
             });
-          console.log(111);
           nftPrice.push(etherValue);
           if (price === "0") {
             setSalePrice.push(false);
@@ -107,7 +108,18 @@ function MainMarket() {
           let bid = await SMAV2.methods
             .currentBidDetailsOfToken(config.Chimera, nfts)
             .call();
-          bidding.push(bid);
+          const eth = Web3.utils.fromWei(bid[0], "ether");
+
+          await axios
+            .get(
+              "https://min-api.cryptocompare.com/data/price?fsym=BNB&tsyms=USD"
+            )
+            .then((res) => {
+              let d = res.data;
+              let USD = d.USD * eth;
+              USDTValueBid.push(financial(USD));
+            });
+          bidding.push(eth);
           if (bid[0] === "0") {
             biddingBool.push(false);
           } else {
@@ -126,6 +138,7 @@ function MainMarket() {
         bidding,
         biddingBool,
         USDTValue,
+        USDTValueBid,
       ]).then((res) => {
         console.log(res);
         if (res[0].length === 0) {
@@ -141,6 +154,8 @@ function MainMarket() {
         setBiddingPrice(res[7]);
         setBiddingOrNot(res[8]);
         setUSDValue(res[9]);
+        setUSDValueBid(res[10]);
+
         setLoading(false);
       });
     } catch (error) {
@@ -356,10 +371,10 @@ function MainMarket() {
                                 <>
                                   {/* 1st item */}
                                   <div className=" border-2 border-black-100 relative flex flex-col bg-white ">
-                                    <Link
+                                    {/* <Link
                                       to={`artworkdetailed/${TokenId[key]}`}
-                                    >
-                                      {/* <a href={`artworkdetailed/${TokenId[key]}`}> */}
+                                    > */}
+                                    <a href={`artworkdetailed/${TokenId[key]}`}>
                                       <img
                                         src={d.image}
                                         style={{
@@ -368,8 +383,8 @@ function MainMarket() {
                                         }}
                                         alt="Random Creativity Outburst"
                                       />
-                                    </Link>
-                                    {/* </a> */}
+                                      {/* </Link> */}
+                                    </a>
                                     <div className="  mx-3 mt-2 grid gap-2  sm:grid-cols-12  lg:grid-cols-12">
                                       <div className=" sm:col-span-12 lg:col-span-12  ">
                                         <h1 className="font-bold text-base nftName text-black">
@@ -397,10 +412,13 @@ function MainMarket() {
                                                   <div className="col-start-6 col-span-7 mb-2">
                                                     <h1 className="text-base text-green-100">
                                                       <span>
-                                                        {BiddingPrice[key][0]}
+                                                        {BiddingPrice[key]}
                                                       </span>
                                                       Ξ(
-                                                      <span>$6,720</span>)
+                                                      <span>
+                                                        ${USDValueBid[key]}
+                                                      </span>
+                                                      )
                                                       <p className="text-xxs mt-2 text-green-200">
                                                         Current offer by{" "}
                                                         <a
